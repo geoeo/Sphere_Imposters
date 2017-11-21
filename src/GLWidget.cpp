@@ -358,6 +358,8 @@ void GLWidget::drawMolecules()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		GLfloat light_position[] = { 0.0f, 0.0f, 100.0f };
+
         // bind vertex array object and shader program
 		QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao_molecules); // destructor unbinds (i.e. when out of scope)
 		QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -367,13 +369,30 @@ void GLWidget::drawMolecules()
 		GLfloat m_viewport[4];
 		glGetFloatv(GL_VIEWPORT, m_viewport);
 
+		glm::mat4 proj_inv = glm::inverse(m_camera.getProjectionMatrix());
+
 
         // set shader uniforms
 		int viewMatrixId = m_program_molecules->uniformLocation("view");
 		glUniformMatrix4fv(viewMatrixId, 1, GL_FALSE, glm::value_ptr(m_camera.getViewMatrix()));
 
+		//int viewMatrixFragId = m_program_molecules->uniformLocation("view_fragshader");
+		//glUniformMatrix4fv(viewMatrixFragId, 1, GL_FALSE, glm::value_ptr(m_camera.getViewMatrix()));
+
 		int projMatrixId = m_program_molecules->uniformLocation("proj");
 		glUniformMatrix4fv(projMatrixId, 1, GL_FALSE, glm::value_ptr(m_camera.getProjectionMatrix()));
+
+		int projMatrixInvId = m_program_molecules->uniformLocation("proj_inv");
+		glUniformMatrix4fv(projMatrixInvId, 1, GL_FALSE, glm::value_ptr(proj_inv));
+
+		int lightPosId = m_program_molecules->uniformLocation("lightPos");
+		glUniform1fv(lightPosId, 1, light_position);
+
+		int nearId = m_program_molecules->uniformLocation("near");
+		glUniform1f(nearId, m_camera.getNearPlane());
+
+		int farId = m_program_molecules->uniformLocation("far");
+		glUniform1f(farId, m_camera.getFarPlane());
 
 		int ambientId = m_program_molecules->uniformLocation("ambient");
 		glUniform1f(ambientId, ambientFactor);
