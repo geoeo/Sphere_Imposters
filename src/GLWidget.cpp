@@ -231,6 +231,8 @@ void GLWidget::allocateGPUBuffer(int frameNr)
 	m_program_molecules->setAttributeBuffer("atomPos", GL_FLOAT, 0, 3);
 	m_program_molecules->enableAttributeArray("atomPos");
 
+	m_vbo_pos.release();
+
 	// COLOR
 	if (!m_vbo_colors.create()) {
 		qDebug() << "Error creating vbo_pos";
@@ -243,8 +245,11 @@ void GLWidget::allocateGPUBuffer(int frameNr)
 	float * flat_array_color = &m_colors[0].x;
 	m_vbo_colors.allocate(flat_array_color, 3 * m_nrAtoms * sizeof(float));
 
+
 	m_program_molecules->setAttributeBuffer("inputColor", GL_FLOAT, 0, 3);
 	m_program_molecules->enableAttributeArray("inputColor");
+
+	m_vbo_colors.release();
 
 	// RADIUS
 	if (!m_vbo_radii.create()) {
@@ -260,6 +265,8 @@ void GLWidget::allocateGPUBuffer(int frameNr)
 
 	m_program_molecules->setAttributeBuffer("inputRadius", GL_FLOAT, 0, 1);
 	m_program_molecules->enableAttributeArray("inputRadius");
+
+	m_vbo_radii.release();
 
 
 
@@ -357,14 +364,31 @@ void GLWidget::drawMolecules()
 
 		m_program_molecules->bind();
 
+		GLfloat m_viewport[4];
+		glGetFloatv(GL_VIEWPORT, m_viewport);
+
+
         // set shader uniforms
-		unsigned int viewMatrixId = glGetUniformLocation(m_program_molecules->programId(), "view");
-		//qDebug() << viewMatrixId;
+		int viewMatrixId = m_program_molecules->uniformLocation("view");
 		glUniformMatrix4fv(viewMatrixId, 1, GL_FALSE, glm::value_ptr(m_camera.getViewMatrix()));
 
-		unsigned int projMatrixId = glGetUniformLocation(m_program_molecules->programId(), "proj");
-		//qDebug() << projMatrixId;
+		int projMatrixId = m_program_molecules->uniformLocation("proj");
 		glUniformMatrix4fv(projMatrixId, 1, GL_FALSE, glm::value_ptr(m_camera.getProjectionMatrix()));
+
+		int ambientId = m_program_molecules->uniformLocation("ambient");
+		glUniform1f(ambientId, ambientFactor);
+
+		int diffuseId = m_program_molecules->uniformLocation("diffuse");
+		glUniform1f(diffuseId, diffuseFactor);
+
+		int specularId = m_program_molecules->uniformLocation("specular");
+		glUniform1f(specularId, specularFactor);
+
+		int screenWidthId = m_program_molecules->uniformLocation("screenWidth");
+		glUniform1f(screenWidthId, m_viewport[2]);
+
+		int screenHeightId = m_program_molecules->uniformLocation("screenHeight");
+		glUniform1f(screenHeightId, m_viewport[3]);
 
 
 		// draw call
