@@ -133,7 +133,7 @@ void main()
 	vec3 normal_frag = vec3(x_d,y_d,z_screen_comp);
 	//vec3 normal_view = mat3(transpose(proj))*normal_frag;
 	vec3 normal_obj = mat3(transpose(view*proj))*normal_frag;
-	vec3 normal_view = mat3(view)*normal_obj;
+	vec3 normal_view = mat3(transpose(view))*normal_obj;
 	vec3 normal_obj_normalized = normalize(normal_obj);
 
 	// DEPTH RECONSTRUCTION
