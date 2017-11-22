@@ -369,7 +369,7 @@ void GLWidget::drawMolecules()
 		GLfloat m_viewport[4];
 		glGetFloatv(GL_VIEWPORT, m_viewport);
 
-		glm::mat4 proj_inv = glm::inverse(m_camera.getProjectionMatrix());
+		//glm::mat4 proj_inv = glm::inverse(m_camera.getProjectionMatrix());
 
 
         // set shader uniforms
@@ -382,11 +382,14 @@ void GLWidget::drawMolecules()
 		int projMatrixId = m_program_molecules->uniformLocation("proj");
 		glUniformMatrix4fv(projMatrixId, 1, GL_FALSE, glm::value_ptr(m_camera.getProjectionMatrix()));
 
-		int projMatrixInvId = m_program_molecules->uniformLocation("proj_inv");
-		glUniformMatrix4fv(projMatrixInvId, 1, GL_FALSE, glm::value_ptr(proj_inv));
+		//int projMatrixInvId = m_program_molecules->uniformLocation("proj_inv");
+		//glUniformMatrix4fv(projMatrixInvId, 1, GL_FALSE, glm::value_ptr(proj_inv));
 
 		int lightPosId = m_program_molecules->uniformLocation("lightPos");
 		glUniform1fv(lightPosId, 1, light_position);
+
+		//int cameraPosId = m_program_molecules->uniformLocation("cameraPos");
+		//glUniform1fv(cameraPosId, 1, glm::value_ptr(m_camera.getPosition()));
 
 		int nearId = m_program_molecules->uniformLocation("near");
 		glUniform1f(nearId, m_camera.getNearPlane());
