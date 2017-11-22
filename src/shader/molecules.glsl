@@ -130,11 +130,11 @@ void main()
 
 	// NORMAL RECONSTRUCTION
 	float z_screen_comp = 1.0-abs(P_screen_mag);
-	vec4 normal_frag = vec4(x_d,y_d,z_screen_comp,0.0);
-	vec4 normal_view = transpose(proj)*normal_frag;
-	vec4 normal_obj = transpose(view*proj)*normal_frag;
-	normal_view = view * normal_obj;
-	vec3 normal_obj_normalized = normalize(normal_obj.xyz);
+	vec3 normal_frag = vec3(x_d,y_d,z_screen_comp);
+	//vec3 normal_view = mat3(transpose(proj))*normal_frag;
+	vec3 normal_obj = mat3(transpose(view*proj))*normal_frag;
+	vec3 normal_view = mat3(view)*normal_obj;
+	vec3 normal_obj_normalized = normalize(normal_obj);
 
 	// DEPTH RECONSTRUCTION
 	vec4 normal_obj_scaled = vec4(normal_obj_normalized,0.0)*radius_obj_space;
@@ -148,18 +148,13 @@ void main()
 
 	// BLINN_PHONG
 	float shininess = 64.0;
-	//vec4 normal_view = transpose(view)*vec4(normal_obj_normalized,0.0);
-	//normal_view.x = abs(normal_view.x);normal_view.y = abs(normal_view.y);
-	//normal_view.z = abs(normal_view.z);
-	vec3 normal_view_normalized = normalize(normal_view.xyz);
-	//vec3 normal_view_normalized = vec3(1.0,0.0,0.0);
+	vec3 normal_view_normalized = normalize(normal_view);
 	vec4 lightPos_view = view*vec4(lightPos,1.0);
-	 // As the light is defined to be at Z = 100 on CPU, it would be behind the objects
-	lightPos_view.z *= -1;
+	lightPos_view = normalize(-lightPos_view);
 	vec3 viewDir = normalize(-S_viewspace.xyz);
-	vec3 lightDir = normalize(lightPos_view.xyz-S_viewspace.xyz);
+	vec3 lightDir = normalize(lightPos_view.xyz+viewDir);
 
-	float lambertian = max(dot(lightDir,normal_view_normalized),0.0);
+	float lambertian = max(dot(normal_view_normalized,lightDir),0.0);
 
 	vec3 halfDir = normalize(lightDir + viewDir);
 	float specAngle = max(dot(halfDir,normal_view_normalized),0.0);
