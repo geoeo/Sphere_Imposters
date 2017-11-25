@@ -23,7 +23,7 @@ QT_FORWARD_DECLARE_CLASS(QWebSocket)
 template <class T>
 class Propagation {
 public:
-    Propagation(const QString &message, const QWidget &w, double pixelRatio) :
+    Propagation(const QString &message, QWidget &w, double pixelRatio) :
         message_(message),
         widget_(w),
         x_(0),
@@ -49,6 +49,11 @@ public:
     }
 
     void exec() {
+
+
+		//if (message_.startsWith("animate_image")) {
+		//	return static_cast<T*>(this)->exec(&widget_, x_, y_,z_);
+		//}
 
         QWidget *w = widget_.childAt(QPoint(x_, y_));
         if (!w) {
@@ -76,7 +81,7 @@ public:
     }
 
 protected:
-    const QWidget &widget_;
+    QWidget &widget_;
     const QString &message_;
     long x_;
     long y_;
@@ -109,6 +114,12 @@ class Wheel : public Propagation<Wheel> {
 public:
 	void exec(QWidget *w, long x, long y, long z) {
 		QApplication::sendEvent(w, new QWheelEvent(QPoint(x, y), z * 70, Qt::NoButton, Qt::NoModifier, Qt::Vertical));
+	};
+};
+class KeyDown : public Propagation<KeyDown> {
+public:
+	void exec(QWidget *w, long x, long y, long z) {
+		QApplication::sendEvent(w, new QKeyEvent(QEvent::KeyPress,int(Qt::Key_Space), Qt::NoModifier));
 	};
 };
 

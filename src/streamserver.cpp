@@ -86,6 +86,17 @@ void StreamServer::processTextMessage(QString message)
 			prop.exec();
 			sendImage(pClient, "JPG", 100);
 		}
+		else if (message.startsWith("animate_image")) {
+			Propagation<KeyDown> prop(message, widget, pixelRatio);
+			prop.exec();
+			sendImage(pClient, "JPG", 100);
+		}
+
+		else if (message.startsWith("access_image")) {
+			Propagation<KeyDown> prop(message, widget, pixelRatio);
+			prop.exec();
+			sendImage(pClient, "JPG", 100);
+		}
 	}
 }
 

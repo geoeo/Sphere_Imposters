@@ -57,6 +57,7 @@ GLWidget::GLWidget(QWidget *parent, MainWindow *mainWindow)
 {
 	m_MainWindow = mainWindow;
 	m_fileWatcher = new QFileSystemWatcher(this);
+	this->setObjectName("RenderWidget");
 	connect(m_fileWatcher, SIGNAL(fileChanged(const QString &)), this, SLOT(fileChanged(const QString &)));
 
 
@@ -538,6 +539,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Space:
         {
             // TODO: play/pause animation
+			if (m_isPlaying)
+				pauseAnimation();
+			else
+				playAnimation();
             break;
         }
         default:
@@ -577,6 +582,7 @@ void GLWidget::pauseAnimation()
 
 void GLWidget::setAnimationFrame(int frameNr)
 {
+	qDebug() << frameNr;
 	m_currentFrame = frameNr;
 	allocateGPUBuffer(frameNr);
 }
