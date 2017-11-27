@@ -105,6 +105,9 @@ uniform mat4 proj;
 void main()
 {
 
+	vec3 color = fragColor.rgb;
+	float alpha = fragColor.a;
+
 	vec2 sphereCenterScreen = vec2(sphere_center_proj.x*screenWidth/2 + screenWidth/2,sphere_center_proj.y*screenHeight/2 + screenHeight/2);
 	vec2 posOnSphereScreen = vec2(pos_on_sphere_proj.x*screenWidth/2 + screenWidth/2,pos_on_sphere_proj.y*screenHeight/2 + screenHeight/2);
 
@@ -112,8 +115,10 @@ void main()
 	float y_d = sphereCenterScreen.y - gl_FragCoord.y;
 	float radius_screen = abs(posOnSphereScreen.x - sphereCenterScreen.x);
 
-	float R = radius_screen;
-	float eta = 0.2;
+	//float eps = 0.2;
+	//float R = 1.0 - eps;
+	//float d = 0;
+	//float weight = 0;
 
 	// MAPS TO [-1,1]
 	vec2 P_screen = vec2(x_d,y_d)/radius_screen;
@@ -123,6 +128,13 @@ void main()
 	if(P_screen_mag > 1.0){
 		discard;
 	}
+
+	//bool isContourFrag = false;
+	//if(P_screen_mag <= 1.0 && P_screen_mag >= R){
+	//	isContourFrag = true;
+	//	d = P_screen_mag;
+	//	weight = (d-R)/eps;
+	//}
 
 	// NORMAL RECONSTRUCTION
 	float z_screen_comp = (1.0-abs(P_screen_mag))*radius_screen;
@@ -136,13 +148,14 @@ void main()
 	vec4 S_screenspace = proj*S_viewspace;
 	float ndc_depth = S_screenspace.z / S_screenspace.w;
 	float depth = ndc_depth * 2.0 - 1.0;
+	//if(isContourFrag){
+	//	depth += weight*(eps-R);
+	//}
 	gl_FragDepth = depth;
 	//gl_FragDepth =  gl_FragCoord.z; // popping artefacts
 
 
 	// BLINN_PHONG
-	vec3 color = fragColor.rgb;
-	float alpha = fragColor.a;
 	float shininess = 64.0;
 
 	vec4 lightPos_view = view*vec4(lightPos,1.0);
@@ -167,7 +180,10 @@ void main()
 	//gl_FragColor = vec4(new_view_normalized,1.0);
 	//gl_FragColor = vec4(vec3(-1*normal_view_normalized.z),1.0);
 	//gl_FragColor = vec4(viewDir,1.0);
-	//gl_FragColor = vec4(color);
+	//if(isContourFrag){
+	//	color = vec3(0.0,0,1.0);
+	//}
+	//gl_FragColor = vec4(color,1.0);
 	//gl_FragColor = fragColor;
 
 }
