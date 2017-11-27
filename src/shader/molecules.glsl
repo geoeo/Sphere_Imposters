@@ -35,16 +35,14 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
 in vec4 vertexColor[];
-in vec4 lightPosView[];
 in float vertexRadius[];
-
 
 out vec4 fragColor;
 out vec4 sphere_center_view;
 out vec4 sphere_center_proj;
 out vec4 pos_on_sphere_proj;
-out float radius_obj_space;
 
+uniform mat4 view;
 uniform mat4 proj;
 
 void main()
@@ -52,7 +50,6 @@ void main()
 
 	fragColor = vertexColor[0];
 	float radius = vertexRadius[0];	
-	radius_obj_space = radius;
 
 	sphere_center_view = gl_in[0].gl_Position;
 	sphere_center_proj = proj*sphere_center_view;
@@ -86,7 +83,6 @@ in vec4 fragColor;
 in vec4 sphere_center_view;
 in vec4 sphere_center_proj;
 in vec4 pos_on_sphere_proj;
-in float radius_obj_space;
 
 out vec4 gl_FragColor;
 
@@ -112,9 +108,12 @@ void main()
 	vec2 sphereCenterScreen = vec2(sphere_center_proj.x*screenWidth/2 + screenWidth/2,sphere_center_proj.y*screenHeight/2 + screenHeight/2);
 	vec2 posOnSphereScreen = vec2(pos_on_sphere_proj.x*screenWidth/2 + screenWidth/2,pos_on_sphere_proj.y*screenHeight/2 + screenHeight/2);
 
-	float x_d = gl_FragCoord.x -sphereCenterScreen.x;
-	float y_d = gl_FragCoord.y -sphereCenterScreen.y;
+	float x_d = sphereCenterScreen.x - gl_FragCoord.x;
+	float y_d = sphereCenterScreen.y - gl_FragCoord.y;
 	float radius_screen = abs(posOnSphereScreen.x - sphereCenterScreen.x);
+
+	float R = radius_screen;
+	float eta = 0.2;
 
 	// MAPS TO [-1,1]
 	vec2 P_screen = vec2(x_d,y_d)/radius_screen;
@@ -125,22 +124,15 @@ void main()
 		discard;
 	}
 
-	vec3 color = fragColor.rgb;
-	float alpha = fragColor.a;
-
 	// NORMAL RECONSTRUCTION
-	float z_screen_comp = 1.0-abs(P_screen_mag);
-	vec3 normal_frag = vec3(x_d,y_d,z_screen_comp);
-	// This doesnt work... why?
-	//vec3 normal_view = mat3(transpose(view))*normal_frag;
-	//vec3 normal_obj = mat3(transpose(proj))*normal_view;
-	vec3 normal_obj = mat3(transpose(view*proj))*normal_frag;
-	vec3 normal_view = mat3(transpose(view))*normal_obj;
-	vec3 normal_obj_normalized = normalize(normal_obj);
+	float z_screen_comp = (1.0-abs(P_screen_mag))*radius_screen;
+	vec3 normal_screenspace = vec3(x_d,y_d,z_screen_comp); // actually object space?
+	vec3 normal_view = mat3(view)*normal_screenspace;
+	vec3 normal_view_normalized = normalize(normal_view);
 
 	// DEPTH RECONSTRUCTION
-	vec4 normal_obj_scaled = vec4(normal_obj_normalized,0.0)*radius_obj_space;
-	vec4 S_viewspace = sphere_center_view + normal_obj_scaled;
+	vec4 normal_view_4 = vec4(normal_view_normalized,0.0);
+	vec4 S_viewspace = sphere_center_view + normal_view_4;
 	vec4 S_screenspace = proj*S_viewspace;
 	float ndc_depth = S_screenspace.z / S_screenspace.w;
 	float depth = ndc_depth * 2.0 - 1.0;
@@ -149,8 +141,10 @@ void main()
 
 
 	// BLINN_PHONG
+	vec3 color = fragColor.rgb;
+	float alpha = fragColor.a;
 	float shininess = 64.0;
-	vec3 normal_view_normalized = normalize(normal_view);
+
 	vec4 lightPos_view = view*vec4(lightPos,1.0);
 	lightPos_view = normalize(-lightPos_view);
 	vec3 viewDir = normalize(-S_viewspace.xyz);
@@ -167,8 +161,10 @@ void main()
 	gl_FragColor += vec4(specular*spec*color,0.0);
 
 
+	//gl_FragColor = vec4(normalize(normal_frag),1.0);
 	//gl_FragColor = vec4(normal_obj_normalized,1.0);
 	//gl_FragColor = vec4(normal_view_normalized,1.0);
+	//gl_FragColor = vec4(new_view_normalized,1.0);
 	//gl_FragColor = vec4(vec3(-1*normal_view_normalized.z),1.0);
 	//gl_FragColor = vec4(viewDir,1.0);
 	//gl_FragColor = vec4(color);
