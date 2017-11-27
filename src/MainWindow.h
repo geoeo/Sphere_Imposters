@@ -16,6 +16,7 @@
 #include <QVariant>
 
 #include "ui_MainWindow.h"
+#include "streamserver.h"
 #include "GLWidget.h"
 
 class MainWindow : public QMainWindow

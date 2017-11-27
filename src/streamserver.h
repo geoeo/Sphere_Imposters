@@ -120,8 +120,7 @@ class KeyDown : public Propagation<KeyDown> {
 public:
 	void exec(QWidget *w, long x, long y, long z) {
 		if (z > 0) {
-			QString number = QString();
-			number.setNum(z);
+			QString number = QString::number(z);
 			QApplication::sendEvent(w, new QKeyEvent(QEvent::KeyPress, int(Qt::Key_Enter), Qt::NoModifier, number));
 		}
 		else
@@ -138,6 +137,9 @@ class StreamServer : public QObject
 public:
     explicit StreamServer(quint16 port, bool debug, QWidget &widget, double pixelRatio = 1.0, QObject *parent = Q_NULLPTR);
     ~StreamServer();
+	inline bool hasClients() {
+		return m_clients.length() > 0;
+	}
 
 signals:
     void closed();

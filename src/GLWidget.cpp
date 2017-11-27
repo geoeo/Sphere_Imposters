@@ -548,8 +548,11 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
 		case Qt::Key_Enter:
 		{
+			// This is always a string representing "1"or"2"or.."500"
 			QString eventText = event->text();
-			qDebug() << eventText;
+			int frameNr = eventText.toInt()-1;
+			setAnimationFrame(frameNr);
+			m_MainWindow->setAnimationFrameGUI(frameNr);
 		}
         default:
         {
@@ -584,6 +587,11 @@ void GLWidget::playAnimation()
 void GLWidget::pauseAnimation()
 {
 	m_isPlaying = false;
+}
+
+bool GLWidget::isPlaying()
+{
+	return m_isPlaying;
 }
 
 void GLWidget::setAnimationFrame(int frameNr)

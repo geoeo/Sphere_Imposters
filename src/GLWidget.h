@@ -36,6 +36,7 @@ public:
 
 	void playAnimation();
 	void pauseAnimation();
+	bool isPlaying();
 	void setAnimationFrame(int frameNr);
 
 	float ambientFactor;
