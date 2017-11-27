@@ -119,7 +119,13 @@ public:
 class KeyDown : public Propagation<KeyDown> {
 public:
 	void exec(QWidget *w, long x, long y, long z) {
-		QApplication::sendEvent(w, new QKeyEvent(QEvent::KeyPress,int(Qt::Key_Space), Qt::NoModifier));
+		if (z > 0) {
+			QString number = QString();
+			number.setNum(z);
+			QApplication::sendEvent(w, new QKeyEvent(QEvent::KeyPress, int(Qt::Key_Enter), Qt::NoModifier, number));
+		}
+		else
+			QApplication::sendEvent(w, new QKeyEvent(QEvent::KeyPress,int(Qt::Key_Space), Qt::NoModifier));
 	};
 };
 

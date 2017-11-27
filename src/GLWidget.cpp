@@ -545,6 +545,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 				playAnimation();
             break;
         }
+
+		case Qt::Key_Enter:
+		{
+			QString eventText = event->text();
+			qDebug() << eventText;
+		}
         default:
         {
             event->ignore();

@@ -131,7 +131,9 @@ void main()
 	// NORMAL RECONSTRUCTION
 	float z_screen_comp = 1.0-abs(P_screen_mag);
 	vec3 normal_frag = vec3(x_d,y_d,z_screen_comp);
-	//vec3 normal_view = mat3(transpose(proj))*normal_frag;
+	// This doesnt work... why?
+	//vec3 normal_view = mat3(transpose(view))*normal_frag;
+	//vec3 normal_obj = mat3(transpose(proj))*normal_view;
 	vec3 normal_obj = mat3(transpose(view*proj))*normal_frag;
 	vec3 normal_view = mat3(transpose(view))*normal_obj;
 	vec3 normal_obj_normalized = normalize(normal_obj);
@@ -167,6 +169,7 @@ void main()
 
 	//gl_FragColor = vec4(normal_obj_normalized,1.0);
 	//gl_FragColor = vec4(normal_view_normalized,1.0);
+	//gl_FragColor = vec4(vec3(-1*normal_view_normalized.z),1.0);
 	//gl_FragColor = vec4(viewDir,1.0);
 	//gl_FragColor = vec4(color);
 	//gl_FragColor = fragColor;
